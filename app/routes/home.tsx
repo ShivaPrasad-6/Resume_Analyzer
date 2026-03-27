@@ -1,10 +1,9 @@
 import type { Route } from './+types/home';
 import Navbar from '~/components/navbar';
-import { resumes } from '../../constants';
 import ResumeCard from '~/components/ResumeCard';
 import { usePuterStore } from '~/lib/puter';
 import { useLocation, useNavigate } from 'react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,13 +13,44 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { isLoading, auth } = usePuterStore();
+  const { auth, kv } = usePuterStore();
   const location = useLocation();
-  const next: string = location.search.split('next=')[1];
   const navigate = useNavigate();
+  const [resumes, setResumes] = useState<Resume[]>([]);
+
   useEffect(() => {
     if (!auth.isAuthenticated) navigate('/auth?next=/');
-  }, [auth.isAuthenticated]);
+  }, [auth.isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const loadResumes = async () => {
+      if (!auth.isAuthenticated) return;
+
+      const items = await kv.list('*', true);
+
+      if (!Array.isArray(items)) {
+        setResumes([]);
+        return;
+      }
+
+      const parsedResumes = items
+        .filter((item): item is KVItem => typeof item === 'object' && item !== null && 'value' in item)
+        .map((item) => {
+          try {
+            return JSON.parse(item.value) as Resume;
+          } catch {
+            return null;
+          }
+        })
+        .filter((resume): resume is Resume => resume !== null)
+        .reverse();
+
+      setResumes(parsedResumes);
+    };
+
+    loadResumes();
+  }, [auth.isAuthenticated, kv]);
+
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">
       <Navbar />
@@ -29,11 +59,15 @@ export default function Home() {
           <h1>Track Your Applications & Resume Ratings</h1>
           <h2> Review your submissions and AI-Powered feedback</h2>
         </div>
-        {resumes.length > 0 && (
+        {resumes.length > 0 ? (
           <div className="resumes-section">
             {resumes.map((resume) => (
               <ResumeCard key={resume.id} resume={resume} />
             ))}
+          </div>
+        ) : (
+          <div className="page-heading pb-16">
+            <h2>No saved resumes yet. Upload one to get started.</h2>
           </div>
         )}
       </section>

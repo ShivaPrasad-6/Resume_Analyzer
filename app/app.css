@@ -103,6 +103,27 @@ form {
   .score-badge {
     @apply flex flex-row items-center justify-center py-1 px-2 gap-4 rounded-[96px];
   }
+  .status-badge {
+    @apply inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-semibold;
+  }
+  .status-good {
+    @apply bg-badge-green text-badge-green-text;
+  }
+  .status-better {
+    @apply bg-badge-yellow text-badge-yellow-text;
+  }
+  .status-improve {
+    @apply bg-badge-red text-badge-red-text;
+  }
+  .feedback-accordion {
+    @apply flex flex-col gap-4 w-full;
+  }
+  .feedback-panel {
+    @apply rounded-3xl border border-slate-200 bg-white p-5 shadow-sm;
+  }
+  .feedback-panel-body {
+    @apply mt-5 border-t border-slate-100 pt-5 text-left;
+  }
 
   .form-div {
     @apply flex flex-col gap-2 w-full items-start;
