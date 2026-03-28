@@ -17,7 +17,7 @@ export default function Home() {
   const location = useLocation();
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
-
+  const [loadingResumes, setLoadingResumes] = useState(false);
   useEffect(() => {
     if (!auth.isAuthenticated) navigate('/auth?next=/');
   }, [auth.isAuthenticated, navigate]);
@@ -32,7 +32,7 @@ export default function Home() {
         setResumes([]);
         return;
       }
-
+      setLoadingResumes(true);
       const parsedResumes = items
         .filter((item): item is KVItem => typeof item === 'object' && item !== null && 'value' in item)
         .map((item) => {
@@ -44,7 +44,7 @@ export default function Home() {
         })
         .filter((resume): resume is Resume => resume !== null)
         .reverse();
-
+      setLoadingResumes(false);
       setResumes(parsedResumes);
     };
 
@@ -57,9 +57,18 @@ export default function Home() {
       <section className="main-section">
         <div className="page-heading py-16">
           <h1>Track Your Applications & Resume Ratings</h1>
-          <h2> Review your submissions and AI-Powered feedback</h2>
+          {!loadingResumes && resumes?.length === 0 ? (
+            <h2>No resumes found. Upload your first resume to get feedback.</h2>
+          ) : (
+            <h2>Review your submissions and check AI-powered feedback.</h2>
+          )}
         </div>
-        {resumes.length > 0 ? (
+        {loadingResumes && (
+          <div className="flex flex-col items-center justify-center">
+            <img src="/images/resume-scan-2.gif" className="w-[200px]" />
+          </div>
+        )}
+        {!loadingResumes && resumes.length > 0 ? (
           <div className="resumes-section">
             {resumes.map((resume) => (
               <ResumeCard key={resume.id} resume={resume} />
