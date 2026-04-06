@@ -6,5 +6,4 @@ export default [
   route('/upload', 'routes/upload.tsx'),
   route('/resume/:id', 'routes/resume.tsx'),
   route('/resume/:id/feedback', 'routes/feedback.tsx'),
-  route('/wipe', 'routes/wipe.tsx'),
 ] satisfies RouteConfig;
